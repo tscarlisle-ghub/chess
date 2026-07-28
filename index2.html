@@ -4243,7 +4243,7 @@ function bestMove(g, depth, budget, jitter){
 
 /* ── game-mode state ─────────────────────────────── */
 const STR = {
-  gentle: { label:'Gentle', depth:2, budget:1800, jitter:100 },
+  gentle: { label:'Gentle', depth:2, budget:1800, jitter:45 },
   club:   { label:'Club',   depth:3, budget:3500, jitter:35 },
   firm:   { label:'Firm',   depth:3, budget:6000, jitter:0 }
 };
@@ -4262,6 +4262,69 @@ function coachSay(html, who){
   d.innerHTML = '<span class="who">' + (who || 'Coach') + '</span><span class="ctxt">' + html + '</span>';
   log.appendChild(d);
   log.scrollTop = log.scrollHeight;
+  speak(html);
+}
+
+/* ── spoken voice (Web Speech API) ─────────────────── */
+let voiceOn = false;
+try { voiceOn = localStorage.getItem('tsy-voice') === '1'; } catch(e){}
+let _voice = null;
+
+function pickVoice(){
+  if (!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices().filter(v => v.lang && v.lang.startsWith('en'));
+  if (!vs.length) return;
+  const rank = v =>
+    (/premium|enhanced|natural/i.test(v.name) ? 4 : 0) +
+    (/samantha|ava|serena|karen|daniel|moira/i.test(v.name) ? 2 : 0) +
+    (v.localService ? 1 : 0);
+  vs.sort((a, b) => rank(b) - rank(a));
+  _voice = vs[0];
+}
+if ('speechSynthesis' in window){
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+
+const P_SPOKEN = { K:'king', Q:'queen', R:'rook', B:'bishop', N:'knight' };
+function sanToSpeech(t){
+  t = t.replace(/O-O-O/g, 'castles queenside');
+  t = t.replace(/O-O/g, 'castles kingside');
+  t = t.replace(/\b([KQRBN])?(x)?([a-h])([1-8])(=[QRBN])?([+#])?\b/g,
+    (m, pc, take, f, r, promo, chk) => {
+      let out = pc ? P_SPOKEN[pc] : 'pawn';
+      out += take ? ' takes ' : ' to ';
+      out += f.toUpperCase() + ' ' + r;
+      if (promo) out += ', promoting to ' + P_SPOKEN[promo[1]];
+      if (chk === '+') out += '. Check';
+      if (chk === '#') out += '. Checkmate';
+      return out;
+    });
+  return t;
+}
+
+function speak(html){
+  if (!voiceOn || !('speechSynthesis' in window)) return;
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  let t = d.textContent || '';
+  t = t.replace(/[\u2014\u2013]/g, ', ').replace(/\u2026/g, '').replace(/\s+/g, ' ').trim();
+  t = sanToSpeech(t);
+  if (!t) return;
+  const u = new SpeechSynthesisUtterance(t);
+  if (_voice) u.voice = _voice;
+  u.rate = 0.97; u.pitch = 1.0;
+  // keep the queue short: a flurry of messages should not back up for a minute
+  if (speechSynthesis.pending) speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+function toggleVoice(){
+  voiceOn = !voiceOn;
+  try { localStorage.setItem('tsy-voice', voiceOn ? '1' : '0'); } catch(e){}
+  if (!voiceOn && 'speechSynthesis' in window) speechSynthesis.cancel();
+  buildTools();
+  if (voiceOn) speak('Voice on. I will read my comments aloud.');
 }
 
 function drillParams(){ return { depth:8, budget:5000, jitter:0 }; }
@@ -4849,6 +4912,7 @@ function buildTools(){
     add('New game','sec', () => startGame(humanColor));
     add('Switch sides','sec', () => startGame(humanColor === 'w' ? 'b' : 'w'));
     if (!L.book && !L.drill) add('Strength: ' + STR[strength].label,'sec', cycleStrength);
+    if ('speechSynthesis' in window) add('Voice: ' + (voiceOn ? 'On' : 'Off'),'sec', toggleVoice, voiceOn);
   }
   if (L.type !== 'quiz'){
     add('Legal moves','sec', () => { tools.legal = !tools.legal; render(); buildTools(); }, tools.legal);
@@ -4908,6 +4972,7 @@ function loadLesson(i){
   game = newGame(L.fen);
   flipped = false;
   selected = null; lastMove = null; stepIdx = 0; quiz = null; pIdx = 0;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
   locked = (L.type === 'sequence');
   tools = Object.assign({ legal:true, loose:false, control:false }, L.tools || {});
 
