@@ -4026,6 +4026,18 @@ const LESSONS = [
   body:`<p>The one idea to carry out of the book: your play lives on the queenside and the c-file. When the line ends, put a rook on c8 and start pushing b5 — the coach will meet you in the middle.</p>`
 },
 {
+  id:'masters', kick:'Master Games', title:'Guess the Master\u2019s Move',
+  type:'master', fen:START,
+  lede:'Three of the most famous games ever played. You sit in the master\u2019s chair: before each of their moves, commit to your own guess — then see what was actually played, and why.',
+  body:`<p>This is the oldest training method in chess, and still the best one: playing through master games as a participant instead of a spectator. Guessing forces you to have a reason; the reveal tells you what the reason should have been.</p>
+  <table>
+    <tr><td class="term">The Opera Game</td><td>Morphy, Paris 1858. Seventeen moves at the opera, and every one of them a principle from the Study section. Start here.</td></tr>
+    <tr><td class="term">Game of the Century</td><td>Byrne&ndash;Fischer, New York 1956. A thirteen-year-old sacrifices his queen on purpose. You play Fischer, as Black, board flipped.</td></tr>
+    <tr><td class="term">The Applause Game</td><td>Fischer&ndash;Spassky, World Championship Game 6, 1972. No fireworks — a squeeze so perfect the beaten champion applauded. The hardest to guess, and the most instructive.</td></tr>
+  </table>
+  <p>Use the overlays while you think — <em>Legal moves</em> and <em>What it controls</em> both work mid-game. Wrong guesses cost nothing; they are the point. Matching a master even a third of the time is genuinely strong.</p>`
+},
+{
   id:'g-kq', kick:'Endgame Drills', title:'Drill: The Queen Mate',
   type:'game', drill:true, fen:'4k3/8/8/8/8/8/3Q4/4K3 w - - 0 1',
   greet:'King and queen against king. You must actually do it — I defend as stubbornly as the position allows. The method: shrink my box with the queen a knight&rsquo;s-move away from my king, bring your own king up, and only then mate. One warning: give my king no moves while he is not in check, and you have stalemated a completely won game.',
@@ -4582,6 +4594,334 @@ function cycleStrength(){
 }
 
 
+/* ── master games: guess the move ─────────────────── */
+const MASTERS = [
+{
+  id:'opera', hero:'w', title:'Morphy — The Opera Game',
+  players:'Paul Morphy vs Duke Karl of Brunswick & Count Isouard',
+  where:'Paris Opera House, 1858',
+  intro:'Paris, 1858. Paul Morphy is at the opera, trying to watch <em>Norma</em>, playing two noblemen who share the black pieces between arias. In seventeen moves he produces the most instructive game ever played — every single move a textbook principle. You are Morphy. Find his moves.',
+  outro:'Seventeen moves: develop with threats, never move a piece twice without reason, sacrifice for open lines, and finish with everything working together. This one game contains most of the opening principles in the Study section.',
+  moves:[
+    {san:'e4', note:'The centre, as always.'},
+    {san:'e5'},
+    {san:'Nf3', note:'Develop with a threat on e5.'},
+    {san:'d6', note:'A passive defence — it blocks the dark-squared bishop for the rest of the game.'},
+    {san:'d4', note:'Strike the centre at once. Morphy opens lines before Black is ready.'},
+    {san:'Bg4', note:'A pin — but developing the queenside first while behind in development invites trouble.'},
+    {san:'dxe5', note:'A little tactic: the bishop on g4 is suddenly loose if Black recaptures with the pawn.'},
+    {san:'Bxf3', note:'Forced, effectively — after 4&hellip;dxe5 5.Qxd8+ Kxd8 6.Nxe5 Black is simply down a pawn.'},
+    {san:'Qxf3', note:'Recapture toward the centre. The queen is safe here and eyes f7.'},
+    {san:'dxe5'},
+    {san:'Bc4', note:'The bishop takes the Italian diagonal — f7 again. Two pieces now stare at the weakest square.'},
+    {san:'Nf6', note:'Development at last, and it blocks the threat of Qxf7 mate.'},
+    {san:'Qb3', note:'A double attack: f7 and b7 at once. One queen move, two threats — Black cannot meet both.'},
+    {san:'Qe7', note:'The only defence of f7 — but now the f8-bishop is buried alive.'},
+    {san:'Nc3', note:'Morphy declines to grab b7. Development is worth more than a pawn — the deepest lesson in the game.'},
+    {san:'c6', note:'Guarding b7 and dreaming of b5.'},
+    {san:'Bg5', note:'The last minor piece comes out, pinning the knight. Every white piece is in the game; every guess Black has made is passive.'},
+    {san:'b5', note:'A desperate lunge to drive off the bishop.'},
+    {san:'Nxb5', note:'The sacrifice. Morphy gives a knight to rip open the lines toward the uncastled king. Count the developed pieces and it is not even a gamble.'},
+    {san:'cxb5'},
+    {san:'Bxb5+', note:'The point: check, and the pin on d7 that follows will paralyse Black completely.'},
+    {san:'Nbd7', note:'Forced. Now both black knights are pinned.'},
+    {san:'O-O-O', note:'Castling as an attacking move — the rook lands on the d-file, straight at the pinned knight.'},
+    {san:'Rd8', note:'Defending d7 with everything available.'},
+    {san:'Rxd7', note:'The exchange sacrifice. Remove the defender; the pins do the rest.'},
+    {san:'Rxd7'},
+    {san:'Rd1', note:'The other rook takes the file. Every white piece attacks; the pinned rook on d7 cannot even run.'},
+    {san:'Qe6', note:'Trying to trade queens and survive to an endgame.'},
+    {san:'Bxd7+', note:'Winning back material with check — and keeping the attack.'},
+    {san:'Nxd7'},
+    {san:'Qb8+', note:'The queen sacrifice. The most famous move of the nineteenth century: she gives herself to drag the knight away from d8.'},
+    {san:'Nxb8'},
+    {san:'Rd8#', note:'Mate with the rook, delivered by the two pieces Morphy had left. Opera over.'}
+  ]
+},
+{
+  id:'century', hero:'b', title:'Fischer — The Game of the Century',
+  players:'Donald Byrne vs Bobby Fischer',
+  where:'Rosenwald Memorial, New York, 1956',
+  intro:'New York, 1956. Bobby Fischer is thirteen years old, playing Black against one of America&rsquo;s strongest masters — and about to sacrifice his queen on purpose. You are Fischer. The board is flipped; find his moves.',
+  outro:'The windmill of knight checks, the queen given for a swarm of pieces, and a thirteen-year-old&rsquo;s machine-checked precision half a century before machines. If one game shows what &ldquo;activity is worth more than material&rdquo; means, it is this one.',
+  moves:[
+    {san:'Nf3'},
+    {san:'Nf6', note:'Flexible — the knight first, plans later.'},
+    {san:'c4'},
+    {san:'g6', note:'Fischer sets up the King&rsquo;s Indian: the bishop will live on g7 and hit the centre from a distance.'},
+    {san:'Nc3'},
+    {san:'Bg7', note:'The fianchetto. That bishop is the hero of this game — watch its diagonal.'},
+    {san:'d4'},
+    {san:'O-O', note:'King safe by move four. A thirteen-year-old with better habits than most adults.'},
+    {san:'Bf4'},
+    {san:'d5', note:'Striking the centre immediately — the Gr&uuml;nfeld idea.'},
+    {san:'Qb3', note:'Byrne pressures d5 with the queen.'},
+    {san:'dxc4', note:'Give up the centre pawn to gain time — the queen must spend a move recapturing.'},
+    {san:'Qxc4'},
+    {san:'c6', note:'A quiet, useful move: b5 is now available with tempo on the queen.'},
+    {san:'e4'},
+    {san:'Nbd7', note:'Developing toward e5 and c5. Everything aims at White&rsquo;s big centre.'},
+    {san:'Rd1'},
+    {san:'Nb6', note:'Hitting the queen — the third time she will have to move.'},
+    {san:'Qc5', note:'An awkward square, as Fischer is about to demonstrate.'},
+    {san:'Bg4', note:'Development with a pin, and a quiet threat the queen on c5 has walked into.'},
+    {san:'Bg5', note:'The losing moment, though nobody knew it yet — the bishop leaves e3 undefended, and the queen has no retreat.'},
+    {san:'Na4', note:'The move that made the game immortal. The knight offers itself: if Nxa4, then Nxe4 forks queen and bishop, and everything falls apart on the dark squares.'},
+    {san:'Qa3', note:'Byrne declines and slides away.'},
+    {san:'Nxc3', note:'Taking the moment the tactics are right — now e4 hangs.'},
+    {san:'bxc3'},
+    {san:'Nxe4', note:'The pawn falls anyway, and the knight forks queen and bishop from the centre.'},
+    {san:'Bxe7', note:'Byrne grabs a pawn back and attacks the queen.'},
+    {san:'Qb6', note:'Calm. The queen steps aside and eyes b2 and f2 — both weak.'},
+    {san:'Bc4', note:'Development at last, hitting f7.'},
+    {san:'Nxc3', note:'Another pawn, and the knight cannot be taken: the rook on d1 would hang to the bishop on g4.'},
+    {san:'Bc5', note:'Attacking the queen and setting a trap of his own.'},
+    {san:'Rfe8+', note:'The in-between move — check first, questions later. Study 09 in a single move.'},
+    {san:'Kf1'},
+    {san:'Be6', note:'The immortal move. The bishop blocks its own queen&rsquo;s defence and offers her to the bishop on c5 — because Fischer has calculated that the pieces he gets, working together, are worth more than the queen. Thirteen years old.'},
+    {san:'Bxb6', note:'Byrne takes the queen. Now watch what a windmill looks like.'},
+    {san:'Bxc4+', note:'First check.'},
+    {san:'Kg1'},
+    {san:'Ne2+', note:'The knight begins its dance. The king has exactly one square each time.'},
+    {san:'Kf1'},
+    {san:'Nxd4+', note:'Discovered check — the bishop on c4 gives it while the knight eats a pawn. This is the windmill: check, capture, check, capture.'},
+    {san:'Kg1'},
+    {san:'Ne2+'},
+    {san:'Kf1'},
+    {san:'Nc3+', note:'The last discovered check, and the knight lands where it attacks the rook on d1.'},
+    {san:'Kg1'},
+    {san:'axb6', note:'Only now does Fischer take the bishop back — with a pawn, opening his rook&rsquo;s file for free.'},
+    {san:'Qb4', note:'The queen tries to come back and defend.'},
+    {san:'Ra4', note:'Attacked, the rook attacks. Fischer never defends passively in this game — count how many of his moves are threats.'},
+    {san:'Qxb6'},
+    {san:'Nxd1', note:'The knight finally collects the rook. For the queen, Fischer now has rook, two bishops, and a pawn — and every one of them is active.'},
+    {san:'h3'},
+    {san:'Rxa2', note:'A second pawn, and the rook reaches the seventh&hellip; second rank. Same idea, other direction.'},
+    {san:'Kh2'},
+    {san:'Nxf2', note:'A third. The knight is untouchable everywhere it lands.'},
+    {san:'Re1'},
+    {san:'Rxe1', note:'Trading into a completely winning position — the right time to simplify is when your extra material is active and theirs is not.'},
+    {san:'Qd8+', note:'A last few checks before the end.'},
+    {san:'Bf8', note:'Blocking with the bishop, which is defended.'},
+    {san:'Nxe1'},
+    {san:'Bd5', note:'Reorganizing calmly. There is no rush when the opponent has no threats — another habit worth stealing.'},
+    {san:'Nf3'},
+    {san:'Ne4', note:'The knight heads back toward the king.'},
+    {san:'Qb8'},
+    {san:'b5', note:'The passed pawn starts walking. Study 07: rooks behind, pawns forward.'},
+    {san:'h4'},
+    {san:'h5', note:'Stopping any ideas of h5 by White. Prophylaxis — answer the opponent&rsquo;s plan before your own.'},
+    {san:'Ne5'},
+    {san:'Kg7', note:'The king steps up and out of every check. Endgame rules apply now.'},
+    {san:'Kg1'},
+    {san:'Bc5+', note:'And now the mating net begins — every black piece takes part.'},
+    {san:'Kf1'},
+    {san:'Ng3+', note:'Forcing the king toward the pieces waiting for it.'},
+    {san:'Ke1'},
+    {san:'Bb4+', note:'Each check herds the king one square further from safety.'},
+    {san:'Kd1'},
+    {san:'Bb3+', note:'The light-squared bishop seals the escape.'},
+    {san:'Kc1'},
+    {san:'Ne2+', note:'The knight one last time.'},
+    {san:'Kb1'},
+    {san:'Nc3+', note:'Driving the king into the corner where the rook waits.'},
+    {san:'Kc1'},
+    {san:'Rc2#', note:'Mate. A thirteen-year-old, a sacrificed queen, and not one wasted move. This is why they called it the Game of the Century.'}
+  ]
+},
+{
+  id:'g6-1972', hero:'w', title:'Fischer — The Applause Game',
+  players:'Bobby Fischer vs Boris Spassky, World Championship Game 6',
+  where:'Reykjavik, 1972',
+  intro:'Reykjavik, 1972 — the Match of the Century, tied 2&ndash;2. Fischer, the lifelong king&rsquo;s-pawn player, opens with 1.c4 for almost the first time in his life and plays a Queen&rsquo;s Gambit so perfect that when Spassky resigned, the world champion stood and applauded with the audience. You are Fischer. No sacrifices this time — this game is a slow squeeze, and finding its quiet moves is harder than finding brilliancies.',
+  outro:'&ldquo;Like a symphony of placid beauty,&rdquo; one master called it. No queen sacrifice, no fireworks — just a small weakness created, fixed in place, pressed with every piece, and converted. This is what the middlegame section of the study guide looks like when a world champion plays it.',
+  moves:[
+    {san:'c4', note:'The shock. Fischer played 1.e4 his whole life — Spassky&rsquo;s team barely prepared for anything else.'},
+    {san:'e6'},
+    {san:'Nf3'},
+    {san:'d5'},
+    {san:'d4', note:'Transposing into the Queen&rsquo;s Gambit — an opening Fischer had publicly disparaged and privately mastered.'},
+    {san:'Nf6'},
+    {san:'Nc3'},
+    {san:'Be7'},
+    {san:'Bg5', note:'The classical pin, exactly as in the guided QGD opening lesson.'},
+    {san:'O-O'},
+    {san:'e3'},
+    {san:'h6', note:'Putting the question to the bishop.'},
+    {san:'Bh4', note:'Keeping the pin.'},
+    {san:'b6', note:'The Tartakower — Spassky&rsquo;s pet line. He had never lost with it.'},
+    {san:'cxd5', note:'Release the tension at the right moment: Black must choose how to recapture, and each way has a cost.'},
+    {san:'Nxd5'},
+    {san:'Bxe7', note:'Trade off the defender of the dark squares.'},
+    {san:'Qxe7'},
+    {san:'Nxd5', note:'And the knight, so the recapture leaves a pawn that must be defended forever.'},
+    {san:'exd5', note:'Black now has the &ldquo;hanging&rdquo; structure this whole game will be about.'},
+    {san:'Rc1', note:'The rook to the half-open file before doing anything else — the file is where the game will be won.'},
+    {san:'Be6'},
+    {san:'Qa4', note:'Probing from the side, tying pieces to the queenside pawns.'},
+    {san:'c5', note:'Spassky stakes his claim — and creates the pawns that will need care all game.'},
+    {san:'Qa3', note:'The queen sits on the pin against c5 and simply waits. No threat you can point to; pressure everywhere.'},
+    {san:'Rc8'},
+    {san:'Bb5', note:'A strange-looking square, found in a Soviet game two years earlier. It provokes exactly the reply Spassky plays.'},
+    {san:'a6', note:'The inaccuracy. Geller had shown Spassky the right answer — he forgot it at the board.'},
+    {san:'dxc5', note:'Now the structure fixes: Black gets an isolated d-pawn and a weak c-pawn.'},
+    {san:'bxc5'},
+    {san:'O-O', note:'Only now, with the queenside shaped, does the king tuck away.'},
+    {san:'Ra7', note:'An awkward rook, defending along the second rank.'},
+    {san:'Be2', note:'The bishop&rsquo;s work on b5 is done; it returns to the long view of the kingside. Retreats are moves too.'},
+    {san:'Nd7'},
+    {san:'Nd4', note:'Heading for the trade that leaves Black&rsquo;s pawns weakest.'},
+    {san:'Qf8', note:'Passive, but the e6-bishop needed the queen&rsquo;s protection.'},
+    {san:'Nxe6', note:'Trading the knight for the bishop — now every black pawn on a light square is a little weaker, and e6 must be watched forever.'},
+    {san:'fxe6'},
+    {san:'e4', note:'The centre advances at the exact moment Black cannot answer in kind.'},
+    {san:'d4', note:'Passed — but fixed on a dark square, blockadable, and going nowhere.'},
+    {san:'f4', note:'The pawns roll. Fischer attacks with pawns first and pieces behind — the reverse of a beginner&rsquo;s attack, and far stronger.'},
+    {san:'Qe7'},
+    {san:'e5', note:'Space, and the f5-break is now permanently in the air.'},
+    {san:'Rb8'},
+    {san:'Bc4', note:'The bishop finds its diagonal at last — straight at e6, the weakness created ten moves ago.'},
+    {san:'Kh8'},
+    {san:'Qh3', note:'The queen swings to the kingside. Every white piece has quietly changed wings; nothing Black owns can follow.'},
+    {san:'Nf8', note:'Everything defends e6 now.'},
+    {san:'b3', note:'One quiet move to make the bishop&rsquo;s home permanent. There is no rush — that is the whole style of this game.'},
+    {san:'a5'},
+    {san:'f5', note:'The break, at the moment of maximum effect. The position opens exactly where White&rsquo;s pieces point.'},
+    {san:'exf5'},
+    {san:'Rxf5', note:'Recapture with the rook — the file matters more than the pawn.'},
+    {san:'Nh7'},
+    {san:'Rcf1', note:'Double on the file. Study 07 again: the rooks arrive before the breakthrough, not after.'},
+    {san:'Qd8'},
+    {san:'Qg3', note:'Repositioning — g7 and the e5-e6 push are both in view now.'},
+    {san:'Re7'},
+    {san:'h4', note:'Another quiet pawn move. Fischer improves everything before he takes anything.'},
+    {san:'Rbb7', note:'Spassky&rsquo;s rooks huddle on the seventh, all defence.'},
+    {san:'e6', note:'The pawn advances into the teeth of the defence — it cannot be taken, and it cuts Black&rsquo;s position in two.'},
+    {san:'Rbc7'},
+    {san:'Qe5', note:'Centralization. The queen on e5 attacks, defends, and blockades all at once — the best square on the board.'},
+    {san:'Qe8'},
+    {san:'a4', note:'All the time in the world. Black can only shuffle; White improves a pawn.'},
+    {san:'Qd8'},
+    {san:'R1f2', note:'Preparing to triple — queen and both rooks on one file.'},
+    {san:'Qe8'},
+    {san:'R2f3', note:'The lift. The third piece joins the file, and there is still nothing Black can do.'},
+    {san:'Qd8'},
+    {san:'Bd3', note:'The bishop re-aims at h7 — a second target, and the defence cannot cover both.'},
+    {san:'Qe8'},
+    {san:'Qe4', note:'The queen joins the h7 battery. Every single white piece now attacks.'},
+    {san:'Nf6', note:'Desperation — the knight blocks, and Fischer removes it.'},
+    {san:'Rxf6', note:'The only sacrifice of the game, and it is barely one: the defender falls, and everything is forced.'},
+    {san:'gxf6'},
+    {san:'Rxf6', note:'The second rook takes its place. The black king&rsquo;s cover is gone.'},
+    {san:'Kg8'},
+    {san:'Bc4', note:'Back to the other diagonal — pinning the e-pawn, eyeing g8, closing the net.'},
+    {san:'Kh8'},
+    {san:'Qf4', note:'The final move. Mate on f8 or h6 cannot be stopped without giving up the queen. Spassky resigned — then stood with the audience and applauded. You have just played the game they clapped for.'}
+  ]
+}
+];
+
+let mGame = 0, mIdx = 0, mHits = 0, mTries = 0;
+
+function masterHero(){ return MASTERS[mGame].hero; }
+function masterSide(i){ return i % 2 === 0 ? 'w' : 'b'; }
+
+function startMaster(gi){
+  mGame = gi; mIdx = 0; mHits = 0; mTries = 0;
+  const M = MASTERS[mGame];
+  humanColor = M.hero;
+  flipped = (M.hero === 'b');
+  game = newGame(START);
+  selected = null; lastMove = null; locked = false;
+  L.hintSquares = [];
+  $('ltask').innerHTML = '<div class="chatlog" id="chat"></div>';
+  updateHist(); render(); buildTools();
+  coachSay('<b>' + M.title + '</b><br>' + M.players + ' — ' + M.where + '.<br><br>' + M.intro);
+  masterAdvance();
+}
+
+function masterCue(){
+  const M = MASTERS[mGame];
+  const moveNo = Math.floor(mIdx / 2) + 1;
+  const heroName = M.title.split(' — ')[0];
+  say('Move ' + moveNo + ' — what did ' + heroName + ' play? (<em>Reveal</em> if you are stuck.)');
+}
+
+function masterAdvance(){
+  const M = MASTERS[mGame];
+  if (mIdx >= M.moves.length){ masterFinish(); return; }
+  if (masterSide(mIdx) === M.hero){ locked = false; masterCue(); return; }
+  // opponent ply: autoplay with a beat
+  locked = true;
+  setTimeout(() => {
+    const step = M.moves[mIdx];
+    const mv = game.move(step.san);
+    lastMove = { from:mv.from, to:mv.to };
+    mIdx++;
+    render(); updateHist();
+    if (step.note) coachSay('<span class="mv">' + mv.san + '</span> — ' + step.note);
+    masterAdvance();
+  }, 750);
+}
+
+function afterMasterMove(mv){
+  const M = MASTERS[mGame];
+  const step = M.moves[mIdx];
+  const strip = x => x.replace(/[+#]/g,'');
+  mTries++;
+  render(); updateHist();
+  if (strip(mv.san) === strip(step.san)){
+    mHits++;
+    mIdx++;
+    coachSay('<b>That is the move.</b> <span class="mv">' + mv.san + '</span>' +
+             (step.note ? ' — ' + step.note : '.'));
+    locked = true;
+    setTimeout(masterAdvance, 650);
+  } else {
+    const her = mv.san;
+    locked = true;
+    setTimeout(() => {
+      game.undo();
+      const real = game.move(step.san);
+      lastMove = { from:real.from, to:real.to };
+      mIdx++;
+      render(); updateHist();
+      coachSay('You chose <span class="mv">' + her + '</span>. The move was <span class="mv">' +
+               real.san + '</span>' + (step.note ? ' — ' + step.note : '.'));
+      setTimeout(masterAdvance, 650);
+    }, 800);
+  }
+}
+
+function masterReveal(){
+  if (locked) return;
+  const M = MASTERS[mGame];
+  if (mIdx >= M.moves.length) return;
+  const step = M.moves[mIdx];
+  mTries++;
+  const mv = game.move(step.san);
+  lastMove = { from:mv.from, to:mv.to };
+  mIdx++;
+  render(); updateHist();
+  coachSay('<span class="mv">' + mv.san + '</span>' + (step.note ? ' — ' + step.note : '.'));
+  locked = true;
+  setTimeout(masterAdvance, 650);
+}
+
+function masterFinish(){
+  locked = true;
+  const M = MASTERS[mGame];
+  const heroName = M.title.split(' — ')[0];
+  coachSay(M.outro + '<br><br><b>You found ' + mHits + ' of ' + mTries + '</b> of ' +
+    heroName + '\u2019s moves. ' +
+    (mHits / Math.max(1, mTries) >= 0.5
+      ? 'Genuinely strong — masters&rsquo; moves are hard to predict even for masters.'
+      : 'Every replay raises that number, and the moves you missed are the ones teaching you the most.'));
+  say('<b>Game over.</b> Choose another game, or replay this one.');
+  markDone(L.id);
+}
+
+
 /* ── rendering ─────────────────────────────────────────── */
 function render(){
   board.innerHTML = '';
@@ -4665,6 +5005,7 @@ function onSquare(sq){
 }
 
 function afterMove(mv){
+  if (L.type === 'master'){ afterMasterMove(mv); return; }
   if (L.type === 'game'){ afterHumanGameMove(mv); return; }
   if (L.type === 'solve'){
     const strip = x => x.replace(/[+#]/g,'');
@@ -4906,6 +5247,14 @@ function buildTools(){
     }, quiz && quiz.showNames);
     add('Skip','sec', () => { nextQuizTarget(); render(); });
   }
+  if (L.type === 'master'){
+    add('Reveal move','', masterReveal);
+    add('Restart game','sec', () => startMaster(mGame));
+    MASTERS.forEach((M, gi) => {
+      if (gi !== mGame) add(M.title.split(' \u2014 ')[1] || M.title,'sec', () => startMaster(gi));
+    });
+    if ('speechSynthesis' in window) add('Voice: ' + (voiceOn ? 'On' : 'Off'),'sec', toggleVoice, voiceOn);
+  }
   if (L.type === 'game'){
     add('Hint','', doHint);
     add('Take back','sec', takeBack);
@@ -4918,7 +5267,7 @@ function buildTools(){
     add('Legal moves','sec', () => { tools.legal = !tools.legal; render(); buildTools(); }, tools.legal);
     add('Loose pieces','sec', () => { tools.loose = !tools.loose; render(); buildTools(); }, tools.loose);
     add('What it controls','sec', () => { tools.control = !tools.control; render(); buildTools(); }, tools.control);
-    if (L.type !== 'game') add('Undo','sec', () => {
+    if (L.type !== 'game' && L.type !== 'master') add('Undo','sec', () => {
       if (!game.history().length) return;
       game.undo();
       if (L.autoPush && game.history().length) game.undo();
@@ -4990,9 +5339,10 @@ function loadLesson(i){
   if (L.type === 'quiz') newQuiz();
   if (L.type === 'sequence') seqRender();
   if (L.type === 'game'){ startGame(L.side === 'b' ? 'b' : 'w'); }
+  if (L.type === 'master'){ startMaster(0); }
 
   render(); buildTools(); legendText();
-  if (L.type === 'game'){ /* startGame already spoke */ }
+  if (L.type === 'game' || L.type === 'master'){ /* start function already spoke */ }
   else if (L.type === 'sequence') say('Press <b>Next</b> to walk through the line.');
   else if (L.type === 'solve') say(L.prompt || '');
   else if (L.autoPush) autoPushStatus();
@@ -5011,7 +5361,8 @@ const tabs = $('tabs');
 LESSONS.forEach((l, i) => { l.n = String(i + 1).padStart(2, '0'); });
 LESSONS.forEach((l, i) => {
   if (i === 0){ const g = document.createElement('span'); g.className='tgrp'; g.textContent='Study'; tabs.appendChild(g); }
-  if (l.type === 'game' && LESSONS[i-1] && LESSONS[i-1].type !== 'game'){
+  const isPlay = t => t === 'game' || t === 'master';
+  if (isPlay(l.type) && LESSONS[i-1] && !isPlay(LESSONS[i-1].type)){
     const g = document.createElement('span'); g.className='tgrp'; g.textContent='Play'; tabs.appendChild(g);
   }
   const b = document.createElement('button');
