@@ -72,12 +72,18 @@ main{ display:grid; grid-template-columns:minmax(0,520px) minmax(0,1fr); gap:38p
 
 /* ── board ── */
 .boardwrap{ position:sticky; top:16px; }
-@media (max-width:900px){ .boardwrap{ position:static; } }
 #board{
   width:100%; aspect-ratio:1/1; display:grid;
   grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);
   border:1px solid var(--hairline-strong); user-select:none; touch-action:manipulation;
   background:var(--rust-wash);
+}
+@media (max-width:900px){
+  /* keep board + its tools + status pinned together while the lesson text scrolls beneath */
+  .boardwrap{ top:8px; max-height:calc(100vh - 12px); overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  /* bound the board by viewport height as well as width, so on a phone it never
+     grows tall enough to push its own controls out of view */
+  #board{ max-width:min(94vw, 54vh); margin:0 auto; }
 }
 .sq{ position:relative; display:flex; align-items:center; justify-content:center; cursor:default; }
 .sq.light{ background:var(--rust-wash); }
@@ -124,6 +130,12 @@ button.btn:disabled:hover{ background:none; color:var(--rust); }
 .status b.no{ color:var(--alert); }
 .status .qn{ font-family:var(--cond); font-size:19px; color:var(--rust); font-style:normal; letter-spacing:.04em; }
 .legend{ margin-top:10px; font-size:12.5px; color:var(--ink-mute); font-style:italic; }
+@media (max-width:600px){
+  .tools{ gap:5px; margin-top:10px; }
+  button.btn{ padding:7px 9px; font-size:8.5px; letter-spacing:.15em; }
+  .status{ min-height:2.1em; font-size:13.5px; margin-top:8px; padding-top:8px; }
+  .legend{ display:none; }
+}
 
 /* ── lesson panel ── */
 .panel .num{ font-family:var(--comp); font-size:64px; line-height:.8; color:var(--rust); }
@@ -153,6 +165,7 @@ td.term{ font-family:var(--display); font-weight:700; font-size:9.5px; letter-sp
 
 /* ── move list & steps ── */
 .steps{ margin-top:16px; border-top:1px solid var(--hairline); padding-top:12px; }
+.steps.mwatch{ max-height:440px; overflow:auto; }
 .steps .row{ display:flex; gap:10px; align-items:baseline; padding:5px 0;
   border-bottom:1px solid var(--hairline-ink); }
 .steps .row.now{ background:var(--rust-wash); }
@@ -4036,14 +4049,18 @@ const LESSONS = [
 {
   id:'masters', kick:'Master Games', title:'Guess the Master\u2019s Move',
   type:'master', fen:START,
-  lede:'Three of the most famous games ever played. You sit in the master\u2019s chair: before each of their moves, commit to your own guess — then see what was actually played, and why.',
+  lede:'Three of the most famous games ever played. Two ways to go through them: guess each move before it is revealed, or just sit back and watch the whole thing play out.',
   body:`<p>This is the oldest training method in chess, and still the best one: playing through master games as a participant instead of a spectator. Guessing forces you to have a reason; the reveal tells you what the reason should have been.</p>
   <table>
     <tr><td class="term">The Opera Game</td><td>Morphy, Paris 1858. Seventeen moves at the opera, and every one of them a principle from the Study section. Start here.</td></tr>
     <tr><td class="term">Game of the Century</td><td>Byrne&ndash;Fischer, New York 1956. A thirteen-year-old sacrifices his queen on purpose. You play Fischer, as Black, board flipped.</td></tr>
     <tr><td class="term">The Applause Game</td><td>Fischer&ndash;Spassky, World Championship Game 6, 1972. No fireworks — a squeeze so perfect the beaten champion applauded. The hardest to guess, and the most instructive.</td></tr>
   </table>
-  <p>Use the overlays while you think — <em>Legal moves</em> and <em>What it controls</em> both work mid-game. Wrong guesses cost nothing; they are the point. Matching a master even a third of the time is genuinely strong.</p>`
+  <h3>Two ways to watch</h3>
+  <table>
+    <tr><td class="term">Guess</td><td>The default. Commit to a move before each reveal; overlays work while you think; wrong guesses cost nothing — they are the point.</td></tr>
+    <tr><td class="term">Watch</td><td>Press <em>Watch instead</em> for a plain playback: the whole move list on screen, current move highlighted, commentary alongside it. <em>Play</em> steps through it automatically at a steady pace — <em>Speed</em> cycles Fast, Normal, Slow — or use <em>Next</em> and <em>Back</em> to move through it yourself. Turn <em>Voice</em> on and it reads the moves aloud as they happen.</td></tr>
+  </table>`
 },
 {
   id:'g-kq', kick:'Endgame Drills', title:'Drill: The Queen Mate',
@@ -4834,22 +4851,106 @@ const MASTERS = [
 ];
 
 let mGame = 0, mIdx = 0, mHits = 0, mTries = 0;
+let masterMode = 'guess';   // 'guess' | 'watch'
+let watchTimer = null;
+const WATCH_SPEEDS = [ { label:'Fast', ms:900 }, { label:'Normal', ms:1700 }, { label:'Slow', ms:2800 } ];
+let watchSpeedIdx = 1;
 
 function masterHero(){ return MASTERS[mGame].hero; }
 function masterSide(i){ return i % 2 === 0 ? 'w' : 'b'; }
 
 function startMaster(gi){
   mGame = gi; mIdx = 0; mHits = 0; mTries = 0;
+  watchPause();
   const M = MASTERS[mGame];
   humanColor = M.hero;
   flipped = (M.hero === 'b');
   game = newGame(START);
   selected = null; lastMove = null; locked = false;
   L.hintSquares = [];
-  $('ltask').innerHTML = '<div class="chatlog" id="chat"></div>';
-  updateHist(); render(); buildTools();
-  coachSay('<b>' + M.title + '</b><br>' + M.players + ' — ' + M.where + '.<br><br>' + M.intro);
-  masterAdvance();
+
+  if (masterMode === 'watch'){
+    $('ltask').innerHTML =
+      '<p class="lede" style="margin-top:0">' + M.title + '<br><span style="font-size:13px">' +
+      M.players + ' — ' + M.where + '</span></p>' +
+      '<div class="steps mwatch" id="mSteps"></div>';
+    updateHist(); render(); buildTools();
+    renderWatchSteps();
+    say('Press <b>Play</b> to watch the whole game, or step through with Next.');
+  } else {
+    $('ltask').innerHTML = '<div class="chatlog" id="chat"></div>';
+    updateHist(); render(); buildTools();
+    coachSay('<b>' + M.title + '</b><br>' + M.players + ' — ' + M.where + '.<br><br>' + M.intro);
+    masterAdvance();
+  }
+}
+
+/* ── watch mode: no guessing, just play it out ── */
+function renderWatchSteps(){
+  const M = MASTERS[mGame];
+  const rows = M.moves.map((s, i) => {
+    const num = i % 2 === 0 ? (Math.floor(i/2) + 1) + '.' : '';
+    return '<div class="row' + (i === mIdx - 1 ? ' now' : '') + '">' +
+           '<span class="mvn">' + num + ' ' + s.san + '</span>' +
+           '<span class="note">' + (s.note || '') + '</span></div>';
+  }).join('');
+  const box = $('mSteps');
+  if (!box) return;
+  box.innerHTML = rows;
+  const cur = box.querySelector('.row.now');
+  if (cur) cur.scrollIntoView({ block:'center', behavior:'smooth' });
+}
+
+function watchStep(dir){
+  const M = MASTERS[mGame];
+  if (dir > 0){
+    if (mIdx >= M.moves.length) return false;
+    const step = M.moves[mIdx];
+    const mv = game.move(step.san);
+    lastMove = { from:mv.from, to:mv.to };
+    mIdx++;
+    selected = null;
+    render(); updateHist(); renderWatchSteps();
+    if (voiceOn) speak(mv.san + (step.note ? '. ' + step.note : ''));
+    if (mIdx >= M.moves.length){
+      say('<b>Game complete.</b> Press Restart to watch it again, or choose another game.');
+      markDone(L.id);
+      return false;
+    }
+    say(step.note ? step.note : ('<span class="mv">' + mv.san + '</span> played.'));
+    return true;
+  } else {
+    if (mIdx <= 0) return false;
+    game.undo(); mIdx--;
+    const h = game.history({ verbose:true });
+    lastMove = h.length ? { from:h[h.length-1].from, to:h[h.length-1].to } : null;
+    selected = null;
+    render(); updateHist(); renderWatchSteps();
+    say('Rewound to move ' + (Math.floor(mIdx/2) + 1) + '.');
+    return true;
+  }
+}
+
+function watchPlay(){
+  if (watchTimer) return;
+  if (mIdx >= MASTERS[mGame].moves.length){
+    mIdx = 0; game = newGame(START); selected = null; lastMove = null;
+    render(); updateHist(); renderWatchSteps();
+  }
+  watchTimer = setInterval(() => { if (!watchStep(1)) watchPause(); }, WATCH_SPEEDS[watchSpeedIdx].ms);
+  buildTools();
+}
+function watchPause(){
+  if (watchTimer){ clearInterval(watchTimer); watchTimer = null; }
+  if (L.type === 'master') buildTools();
+}
+function cycleWatchSpeed(){
+  watchSpeedIdx = (watchSpeedIdx + 1) % WATCH_SPEEDS.length;
+  if (watchTimer){ watchPause(); watchPlay(); } else { buildTools(); }
+}
+function setMasterMode(mode){
+  masterMode = mode;
+  startMaster(mGame);
 }
 
 function masterCue(){
@@ -5260,7 +5361,16 @@ function buildTools(){
     add('Skip','sec', () => { nextQuizTarget(); render(); });
   }
   if (L.type === 'master'){
-    add('Reveal move','', masterReveal);
+    add(masterMode === 'guess' ? 'Watch instead' : 'Guess instead','', () =>
+      setMasterMode(masterMode === 'guess' ? 'watch' : 'guess'));
+    if (masterMode === 'watch'){
+      add(watchTimer ? 'Pause' : 'Play','', watchTimer ? watchPause : watchPlay, !!watchTimer);
+      add('Back','sec', () => { watchPause(); watchStep(-1); });
+      add('Next','sec', () => { watchPause(); watchStep(1); });
+      add('Speed: ' + WATCH_SPEEDS[watchSpeedIdx].label,'sec', cycleWatchSpeed);
+    } else {
+      add('Reveal move','', masterReveal);
+    }
     add('Restart game','sec', () => startMaster(mGame));
     MASTERS.forEach((M, gi) => {
       if (gi !== mGame) add(M.title.split(' \u2014 ')[1] || M.title,'sec', () => startMaster(gi));
@@ -5333,6 +5443,7 @@ function loadLesson(i){
   game = newGame(L.fen);
   flipped = false;
   selected = null; lastMove = null; stepIdx = 0; quiz = null; pIdx = 0;
+  watchPause();
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   locked = (L.type === 'sequence');
   tools = Object.assign({ legal:true, loose:false, control:false }, L.tools || {});
